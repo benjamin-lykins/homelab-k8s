@@ -1,0 +1,5 @@
+# No secrets required for this component. Copy to terraform.tfvars only if you
+# want to override a default from variables.tf, e.g.:
+#
+# replica_count = 2
+# default_data_path = "/mnt/longhorn"
