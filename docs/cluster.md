@@ -18,6 +18,9 @@ Each node also has a second onboard NIC (`enp3s0`) that is unused/unplugged.
 Control-plane VIP: **192.168.39.20** (floating, via kube-vip — see kube-vip.md).
 Use this address for `kubectl`/API access instead of any single node's IP.
 
+Also on the LAN, but not a cluster member: `rasppi` at 192.168.39.30/.31 —
+see rasppi.md.
+
 SSH: user `lykins`, key-based auth, same key across all three nodes.
 
 ## Network config
