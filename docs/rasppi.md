@@ -58,8 +58,9 @@ between boots. If you ever partition or mount them, use UUIDs or the
 
 ## OpenMediaVault
 
-Installed 2026-11-12: **OMV 8.x ("synchrony")**, the release that targets
-Debian 13.
+Installed 2026-11-12: **OMV 8.6.1** (`openmediavault 8.6.1-1`, the 8.x
+"synchrony" release for Debian 13). The install took about 13 minutes and the
+script exited cleanly.
 
 ### How it was installed
 
@@ -90,17 +91,41 @@ on this Pi, that step would have:
 - built the gateway from `ip route` output that has **two** default routes
   (one per interface), which could produce a malformed config
 
-So networking is being moved into OMV by hand instead: both interfaces keep
-their current static IPs, with DNS `192.168.39.1` only. NetworkManager is then
-disabled. *(In progress; this section will be updated with the final state.)*
+**Current network state:** networking is still handled entirely by
+NetworkManager, exactly as described under "Network" above. OMV's network
+config is empty, so its web UI's Network → Interfaces page shows nothing; don't
+add interfaces there without planning the switchover. The OMV packages also
+enabled `systemd-networkd` (no configs, so it manages nothing) and
+`systemd-resolved`. `/etc/resolv.conf` still points only at `192.168.39.1`.
+
+Moving the interfaces into OMV (static `.30`/`.31`, DNS `192.168.39.1` only,
+then disabling and purging NetworkManager) has **not** been done. It's
+optional, because OMV works fine with NetworkManager in charge. Do it only with
+console access available, in case the switch drops both links.
 
 ### Access
 
-- Web UI: `http://192.168.39.30/` (port 80). OMV's default login is `admin` /
-  `openmediavault`. **Change it on first login.**
-  *(Pending verification once the install finishes.)*
-- SSH is unchanged (user `lykins`, key auth). The installer adds `lykins` to
-  the `_ssh` group, which is what OMV uses to allow SSH logins.
+- Web UI: `http://192.168.39.30/` (port 80, page title "openmediavault
+  Workbench"). OMV's default login is `admin` / `openmediavault`. **Change it
+  on first login.**
+- SSH: user `lykins`, key auth, as before. OMV now owns `/etc/ssh/sshd_config`,
+  so make SSH changes in the web UI (Services → SSH), not by editing the file.
+  OMV's settings:
+  - `AllowGroups root _ssh`: only members of `_ssh` (or root) can log in.
+    The installer adds `lykins` to `_ssh`. **Any new SSH user must be added to
+    `_ssh`.**
+  - Keys are read from `~/.ssh/authorized_keys` *and* from OMV-managed keys
+    (Users → Users → edit → Public keys, stored in
+    `/var/lib/openmediavault/ssh/authorized_keys/<user>`).
+  - OMV's defaults also allow **root login and password auth**
+    (`PermitRootLogin yes`, `PasswordAuthentication yes`). Consider turning
+    both off in Services → SSH.
+- **Lockout gotcha seen during install:** OMV's `sshd_config` (with
+  `AllowGroups _ssh`) is applied partway through the install, but `lykins` is
+  only added to `_ssh` at the very end. For several minutes, every SSH login
+  was refused with "Permission denied" / "Too many authentication failures".
+  It fixed itself when the script finished. If you reinstall, run the script
+  under `systemd-run` (as above) so it survives, and wait it out.
 
 ### Storage
 
@@ -109,6 +134,11 @@ RAID, or share on them yet. Do that through the web UI (Storage → Disks /
 File Systems / Shared Folders), and refer to the disks by-id, not as `sdX`.
 
 ## Status / open questions
+
+- Optional: move networking from NetworkManager into OMV (see "Current
+  network state" above).
+- Change the OMV `admin` password, and consider disabling root and password
+  SSH logins.
 
 - The intended role is a NAS (OMV). Storage layout (RAID level or separate
   disks, and filesystem) and what it will serve (SMB/NFS shares, a backup
