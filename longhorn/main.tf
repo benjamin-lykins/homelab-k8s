@@ -36,5 +36,14 @@ resource "helm_release" "longhorn" {
     value = var.replica_count
   }
 
+  dynamic "set" {
+    for_each = var.backup_target == null ? [] : [var.backup_target]
+    content {
+      name  = "defaultBackupStore.backupTarget"
+      value = set.value
+      type  = "string"
+    }
+  }
+
   depends_on = [kubernetes_namespace.longhorn]
 }
