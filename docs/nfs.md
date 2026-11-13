@@ -27,7 +27,7 @@ real time. Use `nfs` for:
 Avoid it for databases or other write-heavy files. Writes since the last
 nightly sync aren't covered by parity, and if the Pi goes down every pod
 using the volume hangs. (The `hard` mount option makes I/O wait for the
-server instead of failing.) Use Longhorn for those, once it's deployed.
+server instead of failing.) Use Longhorn for those.
 
 ## Deleting volumes: `onDelete = archive`
 
@@ -69,6 +69,6 @@ The NAS also has a `longhorn-backups` share. `longhorn/variables.tf` sets
 chart value `defaultBackupStore.backupTarget`). The share was tested
 read/write over NFSv4.2 from a node.
 
-**As of 2026-11-12, Longhorn itself is not deployed.** The `longhorn/`
-component has no Terraform state and there's no `longhorn-system` namespace.
-The backup target takes effect when it's next applied.
+Longhorn was installed 2026-11-12 with this target configured. A test backup
+completed and appeared under `backupstore/` in the share. See longhorn.md for
+details.

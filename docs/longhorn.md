@@ -47,11 +47,44 @@ mounted (e.g. at `/mnt/longhorn-extra`) and added as an additional Longhorn
 disk on just those two nodes via `defaultSettings.disks` — but that's a
 capacity increase, not required for Longhorn to work today.
 
+## Backups → rasppi NFS
+
+`backup_target` (default `nfs://192.168.39.30:/longhorn-backups`) is passed
+as the chart value `defaultBackupStore.backupTarget`, which configures the
+`default` BackupTarget. Backups go to the `longhorn-backups` share on the
+rasppi NAS (see rasppi.md and nfs.md). Nodes need `nfs-common` for this as
+well as `open-iscsi`.
+
+No recurring backup job is configured yet. Backups only happen when started
+by hand (UI, or a `Backup` CR). To run them on a schedule, add a
+RecurringJob of task `backup`.
+
+## Deployment history
+
+- **2026-11-12:** installed (chart 1.12.1) with `terraform apply`. Before
+  this, the `longhorn/` component had **no Terraform state** and there was no
+  `longhorn-system` namespace, despite this doc describing it as installed.
+  An earlier install had evidently been removed. A `longhorn-static`
+  StorageClass from that earlier install (52 days old, no PVs) was still
+  present and was left as is. The running longhorn-manager now manages it.
+- On first start, one `longhorn-manager` pod restarted 3 times with
+  `Error starting manager: Operation cannot be fulfilled on settings.longhorn.io
+  "default-replica-count": the object has been modified`. That's a startup
+  race between the three managers initialising settings, and it stopped once
+  one of them won. It's expected on a fresh install, so don't chase it unless
+  the restarts continue.
+- Verified at install: all three Longhorn nodes Ready and Schedulable; a 1Gi
+  PVC came up `healthy` with one replica per node; a snapshot and a backup to
+  the NFS target completed (`state=Completed`) and showed up under
+  `longhorn-backups/backupstore/` on the NAS. Restoring from a backup was
+  **not** tested. The test resources and backup were deleted afterwards.
+
 ## Verifying
 
 ```
 kubectl get pods -n longhorn-system
 kubectl get storageclass
+kubectl -n longhorn-system get backuptargets.longhorn.io   # AVAILABLE should be true
 ```
 
 The Longhorn UI can be reached by port-forwarding the `longhorn-frontend`
