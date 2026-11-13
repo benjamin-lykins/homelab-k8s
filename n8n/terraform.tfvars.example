@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars only if you want to override a default from
+# variables.tf, e.g.:
+#
+# host         = "n8n.home.example"
+# storage_size = "10Gi"
+# timezone     = "UTC"

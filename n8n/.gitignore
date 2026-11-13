@@ -1,0 +1,11 @@
+# Terraform state
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Variable files that may hold local overrides
+*.tfvars
+!terraform.tfvars.example
+
+# Local kubeconfig (cluster credentials)
+homelab.yaml
