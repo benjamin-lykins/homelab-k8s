@@ -3,3 +3,4 @@
 #
 # replica_count = 2
 # default_data_path = "/mnt/longhorn"
+# backup_target = null  # disable backups to the rasppi NFS share

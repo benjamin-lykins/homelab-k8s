@@ -52,6 +52,18 @@ variable "default_data_path" {
   default     = "/var/lib/longhorn"
 }
 
+variable "backup_target" {
+  description = <<-EOT
+    Default backup target for Longhorn volume backups. Points at the
+    "longhorn-backups" NFS share on rasppi (see docs/rasppi.md). The path is
+    the NFSv4 one: OMV exports /export as the v4 pseudo-root, so
+    /export/longhorn-backups on the server is mounted as /longhorn-backups.
+    Set to null to leave the backup target unset.
+  EOT
+  type        = string
+  default     = "nfs://192.168.39.30:/longhorn-backups"
+}
+
 variable "set_default_storage_class" {
   description = <<-EOT
     Whether Longhorn's StorageClass should be marked as the cluster default.
