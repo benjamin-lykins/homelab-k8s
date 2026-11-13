@@ -9,16 +9,20 @@ self-contained Terraform root module in its own folder:
 
 - `longhorn/` — the Longhorn Helm chart, giving replicated block storage built from each node's
   local disk. See `docs/longhorn.md`.
+- `nfs/` — csi-driver-nfs plus the non-default `nfs` StorageClass, backed by the rasppi NAS
+  (`192.168.39.30:/k8s`). See `docs/nfs.md`.
 - `openbao/` — the OpenBao Helm chart in **dev mode**: a single in-memory, auto-unsealed server
   (plus the agent injector and UI Service). All secrets are lost whenever the `openbao-0` pod
   restarts; the root token is `var.dev_root_token` (default `root`).
-
-(A previous `grafana/` component shipped telemetry to Grafana Cloud via the `k8s-monitoring` chart;
-it was removed 2026-09-21 before it was ever successfully redeployed post cluster-rebuild.)
+- `n8n/` — n8n as plain Kubernetes resources (no Helm): a single-replica Deployment on SQLite with
+  its data on a 5Gi `longhorn` PVC, exposed through a Traefik Ingress at
+  `http://n8n.192.168.39.20.nip.io/`. The credential encryption key is a `random_password` kept
+  in Terraform state — losing the state while keeping the PVC makes stored credentials unreadable.
+  See `docs/n8n.md`.
 
 ## Commands
 
-All commands run from inside a component folder (`longhorn/`, `openbao/`):
+All commands run from inside a component folder (`longhorn/`, `nfs/`, `openbao/`, `n8n/`):
 
 ```
 terraform init
